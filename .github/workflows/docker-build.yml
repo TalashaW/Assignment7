@@ -1,0 +1,29 @@
+name: Docker Build and Push
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Build Docker image
+      run: docker build -t qr-code-generator-app .
+    
+    - name: Run container test
+      run: |
+        docker run -d --name test-container qr-code-generator-app
+        sleep 5
+        docker logs test-container
+        docker cp test-container:/app/qr_codes ./test_output
+        ls -la test_output/
+    
+    - name: Cleanup
+      run: docker rm -f test-container
